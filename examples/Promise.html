@@ -239,35 +239,6 @@
 
         })(window);
 
-
-        //过去的代码：异步回调地狱
-        foo.getJSON('/foo?bar=0', function () {
-            $.getJSON('/foo?bar=1', function () {
-                $.getJSON('/foo?bar=2', function () {
-                    $.getJSON('/foo?bar=3', function () {
-                        $.getJSON('/foo?bar=4', function () {
-                            $.getJSON('/foo?bar=5', function () {
-                                $.getJSON('/foo?bar=6', function () {
-                                    $.getJSON('/foo?bar=7', function () {
-                                        $.getJSON('/foo?bar=8', function () {
-                                            $.getJSON('/foo?bar=9', function () {
-                                                $.getJSON('/foo?bar=10', function () {
-                                                    console.log('done');
-                                                })
-                                            })
-                                        })
-                                    })
-                                })
-                            })
-                        })
-                    })
-                })
-            })
-        });
-
-
-
-
     </script>
 </body>
 </html>

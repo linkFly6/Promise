@@ -27,6 +27,7 @@
         window.sogou = window.sogou || {};
         window.sogou.Promise = Promise;
     }
+    //TODO 
     //if (_.isFunction(window.Promise)) return window.Promise;
     var bind = Function.prototype.bind,
         ON_FUlFILLED = '[[OnFulfilled]]',
