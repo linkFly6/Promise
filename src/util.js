@@ -25,6 +25,7 @@
             isFunction: function (value) {
                 return toString.call(value) === '[object Function]';
             },
+
             nextTick: new function () {
                 //自动尝试浏览器最优线程执行
                 var tickObserver = window.MutationObserver,

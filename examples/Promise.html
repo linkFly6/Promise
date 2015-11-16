@@ -154,7 +154,120 @@
             });
             console.groupEnd();
 
+
+
+            //console.group('Promise.all测试9');
+            //var temp9 = new Promise(function (resolve) {
+            //    setTimeout(function () {
+            //        resolve('then');
+            //    }, 1000);
+            //}).then(function (data) {
+            //    return new Promise(function (resolve) {
+            //        setTimeout(function () {
+            //            resolve(data);
+            //        }, 3000);
+            //    });
+            //});
+            //Promise.all([
+            //    true,
+            //    false,
+            //    new Promise(function (resolve, reject) {
+            //        setTimeout(function () {
+            //            resolve(0);
+            //            //reject(1);
+            //        }, 1000);
+            //    }),
+            //    {
+            //        //含有then的对象包装
+            //        then: function (resolve, reject) {
+            //            setTimeout(function () {
+            //                resolve(1);
+            //                //reject(1); //=>直接进入fail
+            //            }, 2000);
+            //        }
+            //    },
+            //    function () {
+            //        console.log(2);
+            //    },
+            //    temp9,
+            //    { 'name': 'linkFly' }]
+
+            //    ).then(function (data) {
+            //        console.log('done', data);//=>[ true, false, 0, 1, function, 'then', {name:'linkFly'} ]
+            //    }, function () {
+            //        console.log('fail', arguments);
+            //    });
+            //console.groupEnd();
+
+
+
+            //console.group('Promise.resolve测试10');
+            //var temp10 = new Promise(function (resolve) {
+            //    setTimeout(function () {
+            //        resolve('then');
+            //    }, 1000);
+            //}).then(function (data) {
+            //    return new Promise(function (resolve) {
+            //        setTimeout(function () {
+            //            resolve(data);
+            //        }, 3000);
+            //    });
+            //});
+            //Promise.resolve(temp10).then(function (data) {
+            //    console.log('done', data);//=> 4s => then
+            //}, function () {
+            //    console.log('fail', arguments);
+            //});
+            //console.groupEnd();
+
+
+            console.group('Promise.resolve测试11');
+            Promise.resolve({
+                then: function (resolve, reject) {
+                    setTimeout(function () {
+                        resolve(0);
+                        //reject(0);//进入fail
+                    }, 1000);
+                }
+            }).then(function (data) {
+                console.log('done', data);//=> 1s => 0
+            }, function () {
+                console.log('fail', arguments);
+            });
+            console.groupEnd();
+
+
         })(window);
+
+
+        //过去的代码：异步回调地狱
+        foo.getJSON('/foo?bar=0', function () {
+            $.getJSON('/foo?bar=1', function () {
+                $.getJSON('/foo?bar=2', function () {
+                    $.getJSON('/foo?bar=3', function () {
+                        $.getJSON('/foo?bar=4', function () {
+                            $.getJSON('/foo?bar=5', function () {
+                                $.getJSON('/foo?bar=6', function () {
+                                    $.getJSON('/foo?bar=7', function () {
+                                        $.getJSON('/foo?bar=8', function () {
+                                            $.getJSON('/foo?bar=9', function () {
+                                                $.getJSON('/foo?bar=10', function () {
+                                                    console.log('done');
+                                                })
+                                            })
+                                        })
+                                    })
+                                })
+                            })
+                        })
+                    })
+                })
+            })
+        });
+
+
+
+
     </script>
 </body>
 </html>
