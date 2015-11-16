@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Promise.js 测试</title>
+    <meta charset="utf-8" />
+    <script src="../src/util.js"></script>
+    <script src="../src/Promise.js"></script>
+</head>
+<body>
+    <script>
+        (function (window) {
+            var writeGroup = function (name, obj) {
+                console.group(name);
+                console.log(obj);
+                console.groupEnd();
+            };
+
+            var Promise = window.sogou.Promise;
+            //var test = new Promise(function (resolve, reject) {
+            //    //setTimeout(function () {
+            //    //    resolve('linkFly');
+            //    //}, 1000);
+            //    reject('linkFly');
+            //}).then(function (data) {
+            //    writeGroup('done', data);
+            //}, function (data) {
+            //    writeGroup('fail', data);
+            //    throw new Error('123');
+            //});
+            //test.then(function (data) {
+            //    writeGroup('done2', data);
+            //}, function (data) {
+            //    writeGroup('fail2', data);
+            //});
+
+
+            //var test = new Promise(function (resolve, reject) {
+            //    resolve('linkFly');
+            //}).then(function (data) {
+            //    return new Promise(function (resolve, reject) {
+            //        setTimeout(function () {
+            //            resolve(123);
+            //        }, 200);
+            //    })
+            //}).then(function (data) {
+            //    writeGroup('throw error', data);
+            //    throw new Error(data);
+            //})
+            //.catch(function (e) {
+            //    writeGroup('get error', e);
+            //});
+
+
+            //var test = new Promise(function (resolve) {
+            //    setTimeout(function () {
+            //        resolve('linkFly');
+            //    }, 1000);
+            //})
+            //.then(function (data) {
+            //    writeGroup('done1', 1);
+            //    return new Promise(function (resolve, reject) {
+            //        setTimeout(function () {
+            //            reject(data);
+            //        }, 1000);
+            //    });
+            //}).then(function (data) { }, function (data) {
+            //    writeGroup('fail3', 2);
+            //    return new Promise(function (resolve) {
+            //        setTimeout(function () {
+            //            resolve(data);
+            //        });
+            //    });
+            //}).then(function (data) {
+            //    writeGroup('done3', data);
+            //    throw new Error('error');
+            //}).catch(function (e) {
+            //    writeGroup('catch error', 1);
+            //    return new Promise(function (resolve) {
+            //        setTimeout(function () {
+            //            resolve(4);
+            //        });
+            //    });
+            //}).then(function (data) {
+            //    writeGroup('error - done', data);
+            //});
+
+
+            console.group('promise测试8');
+            var promise = new Promise(function (resolve, reject) {
+                throw new Error('wtf?');
+            });
+            promise.then(function () {
+                //Error冒泡
+                throw new Error('Error');
+
+            }, function () { })//去掉这个function就能捕捉到异常
+            .catch(function (e) {
+                console.info('catch捕获异常', e); //=> wtf
+                return new Promise(function (resolve) {
+                    resolve('进入成功分支');
+                })
+            });
+            console.groupEnd();
+        })(window);
+    </script>
+</body>
+</html>

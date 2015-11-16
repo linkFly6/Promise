@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Promise测试</title>
+    <meta charset="utf-8" />
+</head>
+<body>
+    <script>
+        (function (window) {
+            //var promise = new Promise(function (resolve, reject) {
+            //    resolve('linkFly', '123');
+            //});
+            //console.group('promise测试');
+            //promise.then(function () {
+            //    console.log('应该输出linkFly', arguments, this);
+            //}).then(function () {
+            //    console.log('这里应该输出什么呢？', arguments,this);//输出了[undefined]
+            //});
+            //console.groupEnd();
+
+
+            //console.group('promise测试2');
+            //promise.then(function () {
+            //    console.log('应该输出linkFly', arguments, this);
+            //}).then(function () {
+            //    return 1;
+            //}).then(function () {
+            //    console.log('第二次then', arguments, this);//arguments => [1],this => window Promise
+            //});
+            //console.groupEnd();
+
+
+            //console.group('promise测试3');
+            //promise.then(function () {
+            //    return new Promise(function (resolve, reject) {
+            //        setTimeout(function () {
+            //            reject('error', '1');
+            //        }, 1000);
+            //    });
+            //}).then(function () { }, function () {
+            //    console.log('输出error?', arguments); //arguments => ["error"]
+            //    return 1;
+            //}).then(function () {
+            //    console.log('第三次then - resolve', arguments); // => [1]
+            //}, function () {
+            //    console.log('第三次then - reject', arguments);
+            //});
+            //console.groupEnd();
+
+
+            //console.group('promise测试4');
+            //var promise = new Promise(function (resolve, reject) {
+            //    resolve('linkFly', '123');
+            //});
+            //promise.then(function () {
+            //    return new Promise(function (resolve, reject) {
+            //        setTimeout(function () {
+            //            resolve('OK');
+            //        }, 1000);
+            //    });
+            //}).then(function () {
+            //    console.log('这里应该输出什么呢？', arguments, this);//1s后输出了[OK]
+            //});
+            //console.groupEnd();
+
+
+
+            //console.group('promise测试5');
+            //promise.then(function () {
+            //    return new Promise(function (resolve, reject) {
+            //        setTimeout(function () {
+            //            //throw new Error('再抛个异常');//这里抛的异常接不住
+            //            reject('error', '1');
+            //        }, 1000);
+            //    });
+            //})
+            ////    .catch(function () {
+            ////    console.log('catch：', arguments);
+            ////})
+            //    .then(function () { }, function () {
+            //        console.log('输出error?', arguments); //arguments => ["error"]
+            //        throw new Error('抛出异常');
+            //    }).catch(function () {
+            //        console.log('catch1:', arguments);//=> 如果这里catch1接住了异常，则后面不会传递
+            //    }).then(function () {
+            //        console.log('第三次then - resolve', arguments); // => [1]
+            //    }, function (error) {
+            //        console.log('第三次then - reject', error); //如果catch1没有接住异常，则error会传递到这里
+            //    }).catch(function () {
+            //        console.log('catch2:', arguments);
+            //    });
+            //console.groupEnd();
+
+
+
+            //console.group('promise测试6');
+            //var promise = new Promise(function (resolve, reject) {
+            //    resolve('linkFly');
+            //});
+            //promise.then(function () {
+            //    throw new Error('这里有异常');
+            //})
+            //.then(function () { }, function (e) {
+            //    throw new Error('new Error');
+            //})
+            //.catch(function (e) {
+            //    //console.log('catch捕获异常', e);
+            //    return new Promise(function (resolve) {
+            //        resolve('进入成功分支');
+            //    })
+            //}).then(function (data) {
+            //    console.log('done', data);//进入成功分支
+            //}, function (e) {
+            //    console.log('catch Error:', e);//捕获
+            //});
+            //console.groupEnd();
+
+
+            //console.group('promise测试7');
+            //var promise = new Promise(function (resolve, reject) {
+            //    //throw new Error('wtf?');
+            //    resolve();
+            //});
+            //promise.then(function () {
+            //    //Error冒泡
+            //    throw new Error('Error');
+            //})
+            //.then(function () { })
+            //.catch(function (e) {
+            //    console.info('catch捕获异常', arguments); //=> Error: Error
+            //    return new Promise(function (resolve) {
+            //        resolve('进入成功分支');
+            //    })
+            //});
+            //console.groupEnd();
+
+
+
+            console.group('promise测试8');
+            var promise = new Promise(function (resolve, reject) {
+                throw new Error('wtf?');
+            });
+            promise.then(function () {
+                //Error冒泡
+                throw new Error('Error');
+
+            }, function () { })//去掉这个function就能捕捉到异常
+            .catch(function (e) {
+                console.info('catch捕获异常', e); //=> wtf
+                return new Promise(function (resolve) {
+                    resolve('进入成功分支');
+                })
+            });
+            console.groupEnd();
+
+        })(window);
+    </script>
+</body>
+</html>
