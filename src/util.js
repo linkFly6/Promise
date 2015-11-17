@@ -25,7 +25,15 @@
             isFunction: function (value) {
                 return toString.call(value) === '[object Function]';
             },
-
+            isArrayLike: function (obj) {
+                if (obj == null) return false;
+                var length = obj.length, t = toString.call(obj);
+                return t === '[object Array]' || length === 0 || !util.isFunction(obj) &&
+                t !== '[object String]' && //解决TypeError：invalid 'in' operand obj，字符串不允许使用in
+                (+length === length && //正数
+                !(length % 1) && //整数
+                (length - 1) in obj); //可以被索引，防止0引发bug
+            },
             nextTick: new function () {
                 //自动尝试浏览器最优线程执行
                 var tickObserver = window.MutationObserver,

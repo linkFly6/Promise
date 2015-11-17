@@ -8,6 +8,20 @@
 <body>
     <script>
         (function (window) {
+
+
+            var noop = function () { };
+
+           
+
+
+
+            
+            
+
+
+
+
             //var promise = new Promise(function (resolve, reject) {
             //    resolve('linkFly', '123');
             //});
@@ -168,6 +182,24 @@
             //        }, 3000);
             //    });
             //});
+
+            //Promise.all([
+            //     new Promise(function (resolve, reject) {
+            //         setTimeout(function () {
+            //             resolve(0);
+            //         }, 200);
+            //     }),
+            //     new Promise(function (resolve, reject) {
+            //         setTimeout(function () {
+            //             reject(1);
+            //         }, 300);
+            //     })
+            //]).then(function (data) {
+            //    console.log('进入done分支，具有Promise的行为的参数会等待Promise处理完毕', data);
+            //}, function (data) {
+            //    console.log('不应该进入fail分支', data);
+            //});
+
             //Promise.all([
             //    true,
             //    false,
@@ -254,6 +286,12 @@
 
 
 
+            //Promise.race([true]).then(function (data) {
+            //    console.log('done', data);
+            //}, function (data) {
+            //    console.log('fail', data);
+            //});
+
             //console.group('Promise.race测试13');
             //Promise.race([{
             //    then: function (resolve) {
@@ -309,6 +347,16 @@
             ////    console.log('fail', data);//木有包装
             ////});
 
+            //Promise.reject(new Promise(function (resolve, reject) {
+            //    setTimeout(function () {
+            //        reject(0);
+            //    }, 1000);
+            //})).then(function (data) {
+            //    console.log('done', data);
+            //}, function (data) {
+            //    console.log('fail', data);
+            //});
+
             //Promise.reject(temp14).then(function (data) {
             //    console.log('done', data);
             //}, function (data) {
@@ -317,7 +365,7 @@
             //console.groupEnd();
 
 
-            console.group('Promise.resolve测试15');
+            //console.group('Promise.resolve测试15');
             //new Promise(function (resolve, reject) {
             //    setTimeout(function () {
             //        reject('123');
@@ -340,19 +388,45 @@
             //});
 
 
-            new Promise(function (resolve, reject) {
-                setTimeout(function () {
-                    throw new Error('linkFly');
-                    //resolve('linkFly');
+            //new Promise(function (resolve, reject) {
+            //    setTimeout(function () {
+            //        throw new Error('linkFly');
+            //        //resolve('linkFly');
 
-                }, 1000);
-            }).then(function (data) {
-                throw new Error(data);
-            }).then(function () { }).catch(function (data) {
-                console.log('fail', data);
-            });
+            //    }, 1000);
+            //}).then(function (data) {
+            //    throw new Error(data);
+            //}).then(function () { }).catch(function (data) {
+            //    console.log('fail', data);
+            //});
 
-            console.groupEnd();
+
+
+            //console.group('Promise 异常跑到catch');
+            //new Promise(function (resolve) {
+            //    setTimeout(function () {
+            //        resolve(0);
+            //    });
+            //}).then(function (data) {
+            //    console.log('done', 1);
+            //    throw new Error(2);
+            //}, function (e) {
+            //    console.log('error', e);
+            //})
+            //.then(function () { }, function (e) {
+            //    console.log('error2', e);
+            //});
+            //console.groupEnd();
+
+
+            //console.group('Promise executor回调timeout抛出异常');
+            //new Promise(function (resolve, reject) {
+            //    setTimeout(function () {
+            //        throw new Error('123');//这个异常捕获不到
+            //    }, 1000);
+            //}).catch(function (e) {
+            //    console.log('成功捕获异常：' + e);
+            //});
         })(window);
 
     </script>

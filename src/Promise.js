@@ -49,7 +49,7 @@
         },
         each = Array.prototype.forEach;
     //DEBUG
-    //var GUID = 0;
+    var GUID = 0;
 
     /*
      * 通过构造函数创建一个Promise对象
@@ -61,7 +61,7 @@
         if (!(this instanceof Promise)) throw new TypeError("Constructor Promise requires 'new'");
         if (!_.isFunction(executor)) throw new TypeError('Not enough arguments to Promise.');
         this._status = STATUS.PENDING;
-        //this._id = GUID++;//DEBUG
+        this._id = GUID++;//DEBUG
         this._isover = false;
         var $this = this;
 
@@ -97,7 +97,6 @@
      * @returns {Promise}
      */
     Promise.prototype.then = function (onFulfilled, onRejected) {
-        if (!_.isFunction(onFulfilled)) return this;
         var $this = this,
             newPromise;
         $this[ON_FUlFILLED] = onFulfilled;
@@ -129,7 +128,10 @@
      * @returns {Promise}
      */
     Promise.all = function (promises) {
-        //TODO promises可循环的Error判定（容错处理）
+        if (!_.isArrayLike(promises)) {//不是arrayLike则无法循环，直接进入fail
+            return Promise.reject(promises);
+        }
+        //TODO这个方法测试不通过
         return new Promise(function (resolve, reject) {
             var res = [];
             each.call(promises, function (item, i) {
@@ -137,6 +139,7 @@
                 //具有promise行为
                 if (itemType === 'object' && _.isFunction(item.then)) {
                     item.then(function (data) {
+                        //不能使用push啊！！！
                         res.push(data);
                         //防止这个promise的长度在循环中产生变动
                         promises.length === res.length && resolve(res);
@@ -158,11 +161,13 @@
      * @returns {Promise}
      */
     Promise.race = function (promises) {
+        if (!_.isArrayLike(promises))
+            return Promise.reject(promises);
         return new Promise(function (resolve, reject) {
             var i = 0,
                 item;
             for (; i < promises.length; i++) {
-                item = promise[i];
+                item = promises[i];
                 if (likePromise(item)) //具有Promise行为
                     item.then(resolve, reject)
                 else {

@@ -53,7 +53,7 @@
     </script>
 
     <script>
-        QUnit.module('Promise.prototype.then(onFulfilled, onRejected) - 测试');
+        QUnit.module('Promise.prototype.then(onFulfilled, onRejected)');
         QUnit.asyncTest('标准测试', function () {
             new Promise(function (resolve, reject) {
                 setTimeout(function () {
@@ -104,7 +104,6 @@
         });
 
 
-        //测试不通过
         QUnit.asyncTest('从fulfilled到rejected', function () {
             stop();
             new Promise(function (resolve, reject) {
@@ -124,7 +123,7 @@
                 ok(false, '第二层then');
             }, function (e) {
                 start();
-                ok(true, '捕获异常?：' + e);
+                ok(true, '第二层then onRejected捕获异常：' + e);
             });
         });
 
@@ -147,6 +146,7 @@
             });
         });
 
+
         QUnit.asyncTest('catch冒泡异常', function () {
             new Promise(function (resolve, reject) {
                 setTimeout(function () {
@@ -154,87 +154,369 @@
                 });
             }).then(function (data) {
                 start();
-                ok(true, '进入了done分支，开始抛出异常，这里测试不通过表示正确');
-                throw new Error('then Error');
+                ok(true, '进入了done分支，开始抛出异常，这里测试不通过表示正确，因为是异步抛的异常，无法通过正常的try catch捕获。异常信息：catch Error 7');
+                throw new Error('catch Error 7');
             });
         });
 
 
-        //测试不通过
         QUnit.asyncTest('catch冒泡捕获', function () {
             new Promise(function (resolve, reject) {
-                setTimeout(function () {
-                    throw new Error('123');
-                }, 1000);
-            })
-                .then(function () { })
-                .then(function () { })
-                .then(function () { })
-                .catch(function (e) {
-                    start();
-                    ok(true, '成功捕获异常：' + e);
-                });
+                throw new Error('123');
+            }).then(function () { })
+            .catch(function (e) {
+                start();
+                ok(true, '成功捕获异常：' + e);
+            });
         });
 
 
-        //测试不通过
-        QUnit.asyncTest('测试Promise结果重写', function () {
+        QUnit.asyncTest('测试Promise结果重写(resolve)', function () {
             new Promise(function (resolve, reject) {
                 setTimeout(function () {
                     resolve('linkFly');
-                }, 1000);
+                }, 100);
             }).then(function (data) {
                 return new Promise(function (resolve, reject) {
                     setTimeout(function () {
                         resolve([data, 'OK']);
-                    }, 1000);
+                    }, 100);
                 });
             }).then(function (datas) {
-                alert('木有走？');
                 start();
-                deepEqual(datas, ['linkFly', 'OK'], '成功接收结果');
+                deepEqual(datas, ['linkFly', 'OK'], '成功接收结果，耗时200ms左右');
+            });
+        });
+
+        QUnit.asyncTest('测试Promise结果重写(resolve2reject)', function () {
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    resolve('linkFly');
+                }, 200);
+            }).then(function (data) {
+                ok(true, '成功接收到数据，进行Promise重写，耗时200ms左右');
+                return new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        reject([data, 'OK']);
+                    }, 200);
+                });
+            }).then(function () {
+                start();
+                ok(false, '测试不通过，不允许走done');
+            }, function (datas) {
+                start();
+                deepEqual(datas, ['linkFly', 'OK'], '第二次then的时候在fail接收结果，耗时400ms左右');
+            });
+        });
+
+
+        QUnit.asyncTest('测试Promise结果重写(reject2resolve)', function () {
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    reject('linkFly');
+                }, 200);
+            }).then(function () { }, function (data) {
+                ok(true, 'fail中成功接收到数据，进行Promise重写，耗时200ms左右');
+                return new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        resolve([data, 'OK']);
+                    }, 200);
+                });
+            }).then(function (datas) {
+                start();
+                deepEqual(datas, ['linkFly', 'OK'], '第二次then的时候在fail接收结果，耗时400ms左右');
+            }, function () {
+                start();
+                ok(false, '测试不通过，不允许走fail');
+            });
+        });
+
+        QUnit.asyncTest('Promise多链，高强度重写返回链测试', function () {
+            stop(3);
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    resolve('linkFly');
+                }, 200);
+            }).then(function (data) {
+                start();
+                equal(data, 'linkFly', '第一次then接收到数据，进行Promise重写（状态为done），耗时200ms左右');
+                return new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        reject(2);
+                    }, 200);
+                });
+            }).then(function (data) {
+                start();
+                ok(false, '测试不通过，第二次then不允许走done');
+            }, function (data) {
+                start();
+                equal(data, 2, '第二次then的时候在fail接收结果，进行Promise重写（状态为fail），耗时400ms左右');
+                return new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        resolve([data, '3']);
+                    }, 300);
+                });
+            }).then(function (datas) {
+                start();
+                deepEqual(datas, [2, '3'], '第三次then的时候在done接收结果，进行异常抛出（需要catch捕获），耗时700ms左右');
+                throw new Error('no promises~~~');
+            }, function () {
+                ok(false, '测试不通过，第三次then不允许走fail');
+            }).catch(function (e) {
+                start();
+                equal(e.message, 'no promises~~~', 'catch成功捕获异常，接收结果为：\'no promises~~~\'');
+            });
+        });
+
+
+        QUnit.asyncTest('Promise catch使用Promise重写', function () {
+            stop(2);
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    resolve('linkFly');
+                }, 200);
+            }).then(function (data) {
+                start();
+                equal(data, 'linkFly', '第一次then接收到数据，进行异常抛出，耗时200ms左右');
+                throw new Error('promise error');
+            }).catch(function (e) {
+                start();
+                equal(e.message, 'promise error', 'catch成功捕获异常，接收结果为：\'promise error\'，进行Promise链重写');
+                return new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        resolve('linkFly');
+                    }, 300);
+                });
+            }).then(function (data) {
+                start();
+                equal(data, 'linkFly', '成功接收catch中的Promise结果，耗时500ms左右');
+            });
+        });
+
+    </script>
+
+    <script>
+        QUnit.module('Promise.all(promises)');
+        QUnit.asyncTest('Promise.all(true) - 参数容错测试', function () {
+            Promise.all(true).then(function (data) {
+                start();
+                equal(true, data, '不应该进入done分支');
+            }, function (data) {
+                start();
+                equal(true, data, '进入fail分支，Promise.all(true)测试，Promise.all要求参数是ArrayLike');
+            });
+        });
+        QUnit.asyncTest('Promise.all([true]) - 简单数据测试', function () {
+            Promise.all([true]).then(function (data) {
+                start();
+                deepEqual([true], data, '进入done分支，Promise.all([true])测试，不具有Promise的行为默认为done，回调函数接收的参数是：[true]');
+            }, function (data) {
+                start();
+                equal(true, data, '不应该进入fail分支');
+            });
+        });
+
+        QUnit.asyncTest('Promise.all([new Promise]) - 具有Promise行为的参数（包含fail状态的Promise）测试', function () {
+            Promise.all([
+                new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        resolve(0);
+                    }, 200);
+                }),
+                new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        reject(1);
+                    }, 300);
+                })
+            ]).then(function (data) {
+                start();
+                ok(false, '不应该进入done分支');
+            }, function (data) {
+                start();
+                equal(1, data, '具有Promise行为的参数，其中某个Promise状态为onRejected，则进入fail分支，接收的数据为：1，耗时300ms左右');
+            });
+        });
+
+        QUnit.asyncTest('Promise.all([new Promise]) - 具有Promise行为的参数（不包含fail状态的Promise）测试', function () {
+            Promise.all([
+                new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        resolve(0);
+                    }, 200);
+                }),
+                new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        resolve(1);
+                    }, 300);
+                })
+            ]).then(function (data) {
+                start();
+                deepEqual([0, 1], data, '具有Promise行为的参数，所有的Promise状态均为onFulfilled，则进入done分支，接收的数据为（所有的Promise返回的结果）：[0,1]，耗时300ms左右');
+
+            }, function (data) {
+                start();
+                ok(false, '不应该进入fail分支');
+            });
+        });
+
+        QUnit.asyncTest('Promise.all([like Promise]) - 具有Promise行为的非Promise对象参数测试', function () {
+            Promise.all([{
+                //含有then的对象包装
+                then: function (resolve, reject) {
+                    setTimeout(function () {
+                        resolve(1);
+                        //reject(1); //=>直接进入fail
+                    }, 100);
+                }
+            }]).then(function (data) {
+                start();
+                deepEqual([1], data, '进入done分支，测试数据为：[1]，耗时100ms左右');
+            }, function (data) {
+                start();
+                ok(false, '不应该进入fail分支');
             });
         });
 
 
 
+        //测试不通过，Promise.all混合参数有问题
+        QUnit.asyncTest('Promise.all([args]) - 混合参数测试', function () {
+            var testData = [true, false, 0, 1, { 'name': 'linkFly' }];
+            Promise.all([
+                true,
+                false,
+                new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        resolve(0);
+                        //reject(1);
+                    }, 100);
+                }),
+                {
+                    //含有then的对象包装
+                    then: function (resolve, reject) {
+                        setTimeout(function () {
+                            resolve(1);
+                            //reject(1); //=>直接进入fail
+                        }, 200);
+                    }
+                },
+                { 'name': 'linkFly' }
+            ]).then(function (data) {
+                start();
+                deepEqual(testData, data, '进入done分支，测试混合的参数为：[true, false, 0, 1, { \'name\': \'linkFly\' }]，耗时200ms左右');
+            }, function (data) {
+                start();
+                ok(false, '不应该进入fail分支');
+            });
+        });
     </script>
 
-
-
     <script>
-        //QUnit.module('异步加载模块');
-        //asyncTest('service.fetch( qo,seccess,error,time )', function () {
-        //    stop();
-        //    ////测试fetch
-        //    service.fetch(getQo({
-        //        start: 0
-        //    }), function () {
-        //        ok(true, '第一次请求通过：参数：' + arguments.length);//为什么是3??
-        //        start();
-        //    }, function (isTimeout) {
-        //        ok(false, '第一次请求失败，是否是超时结果？' + isTimeout);
-        //        start();
-        //    });
+        QUnit.module('Promise.race(promises)');
+        QUnit.asyncTest('Promise.race(true) - 非Promise行为非ArrayLike参数测试', function () {
+            Promise.race(true).then(function (data) {
+                start();
+                ok(false, '不应该进入done分支');
+            }, function (data) {
+                start();
+                equal(true, data, '进入fail分支，Promise.race(true)测试，Promise.race要求参数是ArrayLike');
+            });
+        });
+        QUnit.asyncTest('Promise.race([true]) - 非Promise行为参数ArrayLike测试', function () {
+            Promise.race([true]).then(function (data) {
+                start();
+                deepEqual(true, data, '进入done分支');
+            }, function (data) {
+                start();
+                ok(false, '不应该进入fail分支');
+            });
+        });
 
-        //    service.fetch(getQo({
-        //        //第二次
-        //        start: 11
-        //    }))
-        //        .fetch(getQo({
-        //            //第三次
-        //            start: 21
-        //        }), function () {
-        //            start();
-        //            ok(true, '第三次请求成功，参数长度' + arguments.length)
-        //        }, function (isTimeout) {
-        //            ok(false, '第三次请求失败，是否是超时结果？' + isTimeout);
-        //            start();
-        //        })
-        //});
+        QUnit.asyncTest('Promise.race([true]) - 非Promise行为参数ArrayLike测试', function () {
+            Promise.race([true]).then(function (data) {
+                start();
+                deepEqual(true, data, '进入done分支');
+            }, function (data) {
+                start();
+                ok(false, '不应该进入fail分支');
+            });
+        });
 
+        QUnit.asyncTest('Promise.race([likePromise]) - 具有Promise行为的参数ArrayLike测试（resolve）', function () {
+            Promise.race([{
+                then: function (resolve) {
+                    setTimeout(function () {
+                        resolve('0');
+                    }, 100);
+                }
+            },
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    reject('1');
+                }, 200);
+            })]).then(function (data) {
+                start();
+                equal(data, '0', '进入done，参数值：0,耗时100ms左右');
+            }, function (data) {
+                start();
+                ok(false, '不应该进入fail分支');
+            });
+        });
 
-
+    </script>
+    <script>
+        QUnit.module('Promise.resolve(value)');
+        QUnit.asyncTest('Promise.resolve(likePromise) - 具有Promise行为的非Promise参数（resolve）', function () {
+            Promise.resolve({
+                then: function (resolve, reject) {
+                    setTimeout(function () {
+                        resolve('linkFly');
+                    }, 100);
+                }
+            }).then(function (data) {
+                start();
+                equal('linkFly', data, '进入done分支，耗时100ms');
+            }, function () {
+                start();
+                ok(false, '不应该进入fail分支');
+            });
+        });
+        QUnit.asyncTest('Promise.resolve(likePromise) - 具有Promise行为的非Promise参数（reject）', function () {
+            Promise.resolve({
+                then: function (resolve, reject) {
+                    setTimeout(function () {
+                        reject('linkFly');
+                    }, 100);
+                }
+            }).then(function () {
+                start();
+                ok(false, '不应该进入done分支');
+            }, function (data) {
+                start();
+                equal('linkFly', data, '进入fail分支，耗时100ms');
+            });
+        });
+        QUnit.asyncTest('Promise.resolve(true) - 直接包装的Promise', function () {
+            Promise.resolve(true).then(function (data) {
+                start();
+                equal(true, data, '直接进入done分支');
+            }, function () {
+                start();
+                ok(false, '不应该进入fail分支');
+            });
+        });
+    </script>
+    <script>
+        QUnit.module('Promise.reject(value)');
+        QUnit.asyncTest('Promise.reject(value) - 任何参数都直接进行reject状态返回', function () {
+            Promise.reject(true).then(function (data) {
+                start();
+                ok(false, '不应该进入done分支');
+            }, function (data) {
+                start();
+                equal(true, data, '直接进入fail分支');
+            });
+        });
     </script>
 
 </body>

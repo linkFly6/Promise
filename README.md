@@ -1,7 +1,7 @@
 # Promise ![license|MIT](https://camo.githubusercontent.com/11b46a2fb2858bbfcaf16cd73aa05f851230d0f5/687474703a2f2f696d672e736869656c64732e696f2f62616467652f6c6963656e73652d4d49542d79656c6c6f77677265656e2e737667)
 
 
-Promise-polyfill兼容库[**Promise.js**](https://github.com/linkFly6/Promise/blob/master/src/Promise.js)
+Promise-polyfill兼容库[**Promise.js**](https://github.com/linkFly6/Promise/blob/master/src/Promise.js)，[`tests/promise.html`](https://github.com/linkFly6/Promise/blob/master/tests/Promise.html)目录下文件里覆盖了完整的API单元测试。
 
 
 ##什么是Promise？
@@ -125,62 +125,288 @@ Promise实现
 
 &nbsp;&nbsp;
 
+
+`Promise`的流程，异步的代码扁平化编写：
+```
+promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
+         |         |          |          |                       |
+         |         |          |          |        +=======+      |
+         |         |          |          |        |       |      |
+         |         |          |          |        |       |      |
+         +---------|----------|----------|--------→  ok() ←------+
+                   |          |          |        |   ↓   |
+                   |          |          |        |   ↓   |
+                   +----------|----------|--------→ ok_1()|
+                              |          |        |   ↓   |
+                              |          |        |   ↓   |
+                              +----------|--------→ ok_2()|
+                                         |        |   ↓   |
+                                         |        |   ↓   |
+                                         +--------→ ok_3()-----+
+                                                  |       |    |       
+                                                  |       |    ↓
+@ Created By Barret Lee                           +=======+   exit
+```
+
 ----------
 
 &nbsp;&nbsp;
 
 特性
  - 优雅精湛的实现Promise
- - 覆盖原生Promise 90% API特性和细节
+ - 覆盖原生Promise 95% 以上的API特性和细节
   
 
-  &nbsp;&nbsp;
+&nbsp;&nbsp;
+
 
 ## API
 ### Promise(callback) 
 > 构造函数（constructor）
 文档：[Promise Object](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)
-
+```javascript
+    var promise = new Promise(function (resolve, reject) {//resolve表示成功，reject表示失败
+        //异步操作
+        setTimeout(function () {
+            resolve('foo');//1s后标识成功
+        }, 1000);
+    });
+```
 ### Promise.prototype.then(onFulfilled[, onRejected])
-> Promise.prototype.then()方法返回一个Promise。它有两个参数，分别为Promise在 success 和 failure 情况下的回调函数  
+> Promise.prototype.then()方法返回一个新的Promise。它有两个参数，分别为Promise在 success（成功） 和 failure（失败） 情况下的回调函数  
 文档：[Promise.prototype.then](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then)
 
 ```javascript
-    var defer = new deferJsonp;
-    defer.load('/test?callback=demo1', function () {
-        return true;//done
+    new Promise(function (resolve, reject) {
+        
+        //异步操作
+        setTimeout(function () {
+            resolve('foo');//1s后标识成功
+        }, 1000);
+        
+    }).then(function (data) {
+        
+        //Resolved
+        console.log(data);//1s后输出foo
+        
+        //传递结果到下一个链
+        return 'bar';
+        
     }, function () {
-        return false;//fail
-    }, 1000)
-		.load('/test?callback=demo2', function (data) {
-			return 'linkFly';
-		})
-		.load('/test?callback=demo3', function (data3, data2, data) {
-			console.log(data, data2, data3);//[true,'linkFly','data3']
-		});
+        
+        //Rejected
+        
+    }).then(function (data) {
+        
+        console.log(data);//1s输出foo后，输出bar
+        
+    })
+```
+
+`then`中的的回调函数可以重写Promise链：
+```javascript
+    new Promise(function (resolve, reject) {
+        //异步操作
+        setTimeout(function () {
+            resolve('foo');//1s后标识成功
+        }, 1000);
+        
+    }).then(function (data) {
+        //Resolved
+        
+        //重写Promise链
+        return new Promise(function (resolve, reject) {
+            
+            setTimeout(function () {
+                reject('bar');
+            }, 1000);
+            
+        });
+        
+    }).then(function () {
+        //Resolved
+    }, function (data) {
+        //Rejected
+        console.log(data);//2s后，输出bar，
+        
+    })
 ```
 
 ### Promise.prototype.catch(onRejected)
 > Promise.prototype.catch() 方法只处理Promise被拒绝的情况，并返回一个Promise。该方法的行为和调用Promise.prototype.then(undefined, onRejected)相同。  
 文档：[Promise.prototype.catch](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch)
+```javascript
+    new Promise(function (resolve, reject) {
+        //异步操作
+        setTimeout(function () {
+            resolve('foo');//1s后标识成功
+        }, 1000);
+        
+    }).then(function (data) {
+        //Resolved
+        throw Error('bar');
+        
+    }).catch(function (e) {
+        //catch接住异常
+        console.log(e);//1s后输出Eoor:bar
+        
+    });
+```
+
+`catch`具有冒泡性质，它的Error可以冒泡。
+```javascript
+    var noop = function () { };
+    new Promise(function (resolve, reject) {
+        //异步操作
+        setTimeout(function () {
+            resolve('foo');//1s后标识成功
+        }, 1000);
+
+    }).then(function (data) {
+        //Resolved
+        throw Error('bar');
+
+    }).then(noop)//多个Promise链
+      .then(noop)
+      .then(noop)
+      .then(noop)
+      .catch(function (e) {
+          //catch接住异常
+          console.log(e);//1s后输出Eoor:bar
+      });
+```
+
+当Promise中的回调函数抛出异常之后（`then/constructor`），需要使用`catch`进行捕获，否则catch会冒泡到全局环境下：
+```javascript
+    new Promise(function () {
+        //window Error => Uncaught (in promise) Error: ex => 触发未捕获异常
+        throw new Error('ex');
+    });
+```
+
+上面的代码会抛出全局异常，而需要使用`catch`进行捕获，`catch`的行为和`then(null, onRejected)`一致，所以也可以使用`then(null, onRejected)`进行捕获，下面两段代码是相同的的意义（捕获异常）：
+```javascript
+    new Promise(function () {
+        throw new Error('ex');
+
+    }).catch(function (e) {
+        //Reject
+        console.log(e);//捕获异常 输出Error: ex
+
+    });
+
+
+    //等同于上面的代码
+    new Promise(function () {
+        throw new Error('ex');
+
+    }).then(function () {
+        //Resolve
+    }, function (e) {
+        //Reject
+        console.log(e);//捕获异常 输出Error: ex
+
+    });
+```
  
 ### Promise.all(promises)
 > Promise.all(promises) 方法返回一个promise，该promise会在iterable参数内的所有promise都被解决后被解决。  
 文档：[Promise.all](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/all)
+```javascript
+    var promise1 = new Promise(function (resolve) {
+        //异步任务
+        setTimeout(function () {
+            resolve('foo');
+        }, 100);
+
+    }), promise2 = new Promise(function (resolve) {
+            setTimeout(function () {
+                resolve('bar');
+            }, 200);
+    });
+
+    Promise.all([promise1, promise2]).then(function (datas) {
+        //Resolve
+        console.log(datas);//约200ms以后，输出：['foo', 'bar']
+
+    }, function () {
+        //Rejected
+    });
+
+```
+
 
 ### Promise.race(promises)
 > Promise.race(promises)方法返回一个promise，这个promise在iterable中的任意一个promise被解决或拒绝后，立刻以相同的解决值被解决或以相同的拒绝原因被拒绝。  
 文档：[Promise.race](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/race)
+```javascript
+    var promise1 = new Promise(function (resolve) {
+        //异步任务
+        setTimeout(function () {
+            resolve('foo');
+        }, 100);
+
+    }), promise2 = new Promise(function (resolve,reject) {
+
+        setTimeout(function () {
+            reject('bar');//失败
+        }, 200);
+    });
+
+    Promise.all([promise1, promise2]).then(function (datas) {
+        //Resolve
+        console.log(datas);//约100ms以后，输出：'foo'
+
+    }, function () {
+        //Rejected
+    });
+```
 
 ### Promise.resolve(value)
 > Promise.resolve(value)方法返回一个以给定值resolve掉的Promise对象。但如果这个值是thenable的（就是说带有then方法）  
 返回的promise会“追随”这个thenable的对象，接收它的最终状态（指resolved/rejected/pendding/settled）；否则这个被返回的promise对象会以这个值被fulfilled  
 文档：[Promise.resolve](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve)
+```javascript
+    //demo1
+    var promise1 = new Promise(function (resolve) {
+        //异步任务
+        setTimeout(function () {
+            resolve('foo');
+        }, 100);
+
+    });
+
+    Promise.resolve(promise1).then(function (datas) {
+        //Resolve
+        console.log(datas);//约100ms以后，输出：'foo'
+
+    }, function () {
+        //Rejected
+    });
+
+
+    //demo2
+    Promise.resolve(true).then(function (data) {
+
+        //Resolve
+        console.log(data);//直接输出true
+    });
+```
 
 ### Promise.reject(value)
 > Promise.reject(reason)方法返回一个用reason拒绝的Promise。  
 文档：[Promise.reject](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject) 
+```javascript
+    Promise.reject(false).then(function (data) {
+        //Resolve => 不会执行
+        console.log(data);
 
+    }, function (value) {
+        //Rejected
+        console.log(value);//直接输出false
+
+    });
+```
 
 
 ##兼容性
