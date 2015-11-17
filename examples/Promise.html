@@ -137,22 +137,22 @@
 
 
 
-            console.group('promise测试8');
-            var promise = new Promise(function (resolve, reject) {
-                throw new Error('wtf?');
-            });
-            promise.then(function () {
-                //Error冒泡
-                throw new Error('Error');
+            //console.group('promise测试8');
+            //var promise = new Promise(function (resolve, reject) {
+            //    throw new Error('wtf?');
+            //});
+            //promise.then(function () {
+            //    //Error冒泡
+            //    throw new Error('Error');
 
-            }, function () { })//去掉这个function就能捕捉到异常
-            .catch(function (e) {
-                console.info('catch捕获异常', e); //=> wtf
-                return new Promise(function (resolve) {
-                    resolve('进入成功分支');
-                })
-            });
-            console.groupEnd();
+            //}, function () { })//去掉这个function就能捕捉到异常
+            //.catch(function (e) {
+            //    console.info('catch捕获异常', e); //=> wtf
+            //    return new Promise(function (resolve) {
+            //        resolve('进入成功分支');
+            //    })
+            //});
+            //console.groupEnd();
 
 
 
@@ -221,22 +221,138 @@
             //console.groupEnd();
 
 
-            console.group('Promise.resolve测试11');
-            Promise.resolve({
-                then: function (resolve, reject) {
-                    setTimeout(function () {
-                        resolve(0);
-                        //reject(0);//进入fail
-                    }, 1000);
-                }
+            //console.group('Promise.resolve测试11');
+            //Promise.resolve({
+            //    then: function (resolve, reject) {
+            //        setTimeout(function () {
+            //            resolve(0);
+            //            //reject(0);//进入fail
+            //        }, 1000);
+            //    }
+            //}).then(function (data) {
+            //    console.log('done', data);//=> 1s => 0
+            //}, function () {
+            //    console.log('fail', arguments);
+            //});
+            //console.groupEnd();
+
+
+            //console.group('Promise.resolve测试12');
+            //Promise.resolve({
+            //    then: function (resolve, reject) {
+            //        setTimeout(function () {
+            //            resolve(0);
+            //            //reject(0);//进入fail
+            //        }, 1000);
+            //    }
+            //}).then(function (data) {
+            //    console.log('done', data);//=> 1s => 0
+            //}, function () {
+            //    console.log('fail', arguments);
+            //});
+            //console.groupEnd();
+
+
+
+            //console.group('Promise.race测试13');
+            //Promise.race([{
+            //    then: function (resolve) {
+            //        setTimeout(function () {
+            //            resolve('0');
+            //        }, 100);
+            //    }
+            //},
+            //new Promise(function (resolve, reject) {
+            //    setTimeout(function () {
+            //        reject('1');
+            //    }, 200);
+            //}),
+
+            ////0,
+
+            ////true,
+
+            //function (name) { }
+            //]).then(function (data) {
+            //    console.log('done', data);
+            //}, function (data) {
+            //    console.log('fail', data);
+            //});
+
+
+
+            //console.group('Promise.resolve测试14');
+            //var temp14 = new Promise(function (resolve, reject) {
+            //    setTimeout(function () {
+            //        reject('123');
+            //    });
+            //}).then(function (data) {
+
+            //}, function (data) {
+            //    return new Promise(function (resolve, reject) {
+            //        setTimeout(function () {
+            //            reject(data);
+            //        }, 3000);
+            //    });
+            //});
+
+            ////Promise.reject({
+            ////    then: function (resolve, reject) {
+            ////        setTimeout(function () {
+            ////            reject(0);
+            ////            //reject(0);//进入fail
+            ////        }, 1000);
+            ////    }
+            ////}).then(function (data) {
+            ////    console.log('done', data);
+            ////}, function (data) {
+            ////    console.log('fail', data);//木有包装
+            ////});
+
+            //Promise.reject(temp14).then(function (data) {
+            //    console.log('done', data);
+            //}, function (data) {
+            //    console.log('fail', data);//也没有包装
+            //});
+            //console.groupEnd();
+
+
+            console.group('Promise.resolve测试15');
+            //new Promise(function (resolve, reject) {
+            //    setTimeout(function () {
+            //        reject('123');
+            //    });
+            //});
+
+            //new Promise(function (resolve, reject) {
+            //    setTimeout(function () {
+            //        throw new Error('abc');
+            //    }, 1000);
+            //})
+            //.catch(function (data) {
+            //    console.log(data);
+            //});
+
+            //.then(function () {
+
+            //}, function (data) {
+            //    console.log(data);
+            //});
+
+
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    throw new Error('linkFly');
+                    //resolve('linkFly');
+
+                }, 1000);
             }).then(function (data) {
-                console.log('done', data);//=> 1s => 0
-            }, function () {
-                console.log('fail', arguments);
+                throw new Error(data);
+            }).then(function () { }).catch(function (data) {
+                console.log('fail', data);
             });
+
             console.groupEnd();
-
-
         })(window);
 
     </script>

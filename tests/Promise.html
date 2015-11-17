@@ -1,108 +1,241 @@
 ﻿<!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Promise.js 测试</title>
-    <meta charset="utf-8" />
+    <title>Promise.js 测试用例</title>
+    <meta content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
+    <meta content="telephone=no" name="format-detection">
+    <meta content="address=no" name="format-detection">
+    <link href="http://cdn.bootcss.com/qunit/1.18.0/qunit.min.css" rel="stylesheet">
+    <!--感谢BootCDN提供的免费CDN服务-->
+    <!--<script src="//cdn.bootcss.com/qunit/1.18.0/qunit.js"></script>-->
+    <script src="http://cdn.bootcss.com/qunit/1.18.0/qunit.min.js"></script>
     <script src="../src/util.js"></script>
-    <script src="../src/Promise.js"></script>
+    <script src="../src/promise.js"></script>
+    <style>
+        .animate-elem { background: yellow; height: 100px; width: 100px; }
+    </style>
 </head>
 <body>
+    <div id="qunit"></div>
+    <!--<h1 id="qunit-header">测试结果</h1>-->
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-banner"></h2>
+    <!--<h2 id="qunit-userAgent">动画模块</h2>-->
+    <!--<div id="qunit-testrunner-toolbar">动画模块参见<a href="animate.html">这里</a>的测试</div>-->
+    <ol id="qunit-tests"></ol>
+    <!--对qunit-fixture的一切修改都会自动还原-->
+    <div id="qunit-fixture">
+    </div>
+    <!--基础配置-->
     <script>
-        (function (window) {
-            var writeGroup = function (name, obj) {
-                console.group(name);
-                console.log(obj);
-                console.groupEnd();
-            };
-
-            var Promise = window.sogou.Promise;
-            //var test = new Promise(function (resolve, reject) {
-            //    //setTimeout(function () {
-            //    //    resolve('linkFly');
-            //    //}, 1000);
-            //    reject('linkFly');
-            //}).then(function (data) {
-            //    writeGroup('done', data);
-            //}, function (data) {
-            //    writeGroup('fail', data);
-            //    throw new Error('123');
-            //});
-            //test.then(function (data) {
-            //    writeGroup('done2', data);
-            //}, function (data) {
-            //    writeGroup('fail2', data);
-            //});
-
-
-            //var test = new Promise(function (resolve, reject) {
-            //    resolve('linkFly');
-            //}).then(function (data) {
-            //    return new Promise(function (resolve, reject) {
-            //        setTimeout(function () {
-            //            resolve(123);
-            //        }, 200);
-            //    })
-            //}).then(function (data) {
-            //    writeGroup('throw error', data);
-            //    throw new Error(data);
-            //})
-            //.catch(function (e) {
-            //    writeGroup('get error', e);
-            //});
-
-
-            //var test = new Promise(function (resolve) {
-            //    setTimeout(function () {
-            //        resolve('linkFly');
-            //    }, 1000);
-            //})
-            //.then(function (data) {
-            //    writeGroup('done1', 1);
-            //    return new Promise(function (resolve, reject) {
-            //        setTimeout(function () {
-            //            reject(data);
-            //        }, 1000);
-            //    });
-            //}).then(function (data) { }, function (data) {
-            //    writeGroup('fail3', 2);
-            //    return new Promise(function (resolve) {
-            //        setTimeout(function () {
-            //            resolve(data);
-            //        });
-            //    });
-            //}).then(function (data) {
-            //    writeGroup('done3', data);
-            //    throw new Error('error');
-            //}).catch(function (e) {
-            //    writeGroup('catch error', 1);
-            //    return new Promise(function (resolve) {
-            //        setTimeout(function () {
-            //            resolve(4);
-            //        });
-            //    });
-            //}).then(function (data) {
-            //    writeGroup('error - done', data);
-            //});
-
-
-            console.group('promise测试8');
-            var promise = new Promise(function (resolve, reject) {
-                throw new Error('wtf?');
-            });
-            promise.then(function () {
-                //Error冒泡
-                throw new Error('Error');
-
-            }, function () { })//去掉这个function就能捕捉到异常
-            .catch(function (e) {
-                console.info('catch捕获异常', e); //=> wtf
-                return new Promise(function (resolve) {
-                    resolve('进入成功分支');
-                })
-            });
-            console.groupEnd();
-        })(window);
+        var Promise = window.sogou.Promise;
+        var toString = Object.prototype.toString,
+        each = Array.prototype.forEach,
+        slice = Array.prototype.slice,
+        map = Array.prototype.map,
+        concat = Array.prototype.concat;
     </script>
+
+    <script>
+        QUnit.module('构造函数');
+        QUnit.asyncTest('Promise.constructor(executor)', function () {
+            new Promise(function (resolve, reject) {
+                resolve('test');
+            }).then(function (data) {
+                QUnit.start();
+                equal('test', data, '测试构造函数和then');
+            }, function () {
+                QUnit.start();
+                ok(false, '进入了fail分支');
+            });
+        });
+    </script>
+
+    <script>
+        QUnit.module('Promise.prototype.then(onFulfilled, onRejected) - 测试');
+        QUnit.asyncTest('标准测试', function () {
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    resolve('test');
+                }, 200);
+            }).then(function (data) {
+                start();
+                equal('test', data, '标准测试Promise.prototype.then');
+            }, function () {
+                start();
+                ok(false, '进入了fail分支');
+            });
+        });
+        QUnit.asyncTest('多层链', function () {
+            stop(1);
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    resolve('test');
+                }, 1000);
+            })
+            .then(function (data) {
+                start();
+                ok('test' === data, '第一层then');
+                return 0;
+            }, function () {
+                start();
+                ok(false, '第一层进入了fail分支');
+            })
+            .then(function (data) {
+                start();
+                ok(0 === data, '第二层then');
+            }, function () {
+                start();
+                ok(false, '第二层进入了fail分支');
+            });
+        });
+
+        QUnit.asyncTest('构造函数中抛出异常', function () {
+            new Promise(function (resolve, reject) {
+                throw new Error('linkFly');
+            }).then(function (data) {
+                start();
+                ok(false, '进入了done分支');
+            }, function (e) {
+                start();
+                ok(true, '进入了fail分支，错误消息：' + e.message);
+            });
+        });
+
+
+        //测试不通过
+        QUnit.asyncTest('从fulfilled到rejected', function () {
+            stop();
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    resolve('linkFly');
+                });
+            }).then(function (data) {
+                start();
+                ok(true, '进入了done分支');
+                throw new Error('then Error');
+            }, function (e) {
+                start();
+                ok(false, '进入了fail分支，错误消息：' + e.message);
+            })
+            .then(function () {
+                start();
+                ok(false, '第二层then');
+            }, function (e) {
+                start();
+                ok(true, '捕获异常?：' + e);
+            });
+        });
+
+
+        QUnit.asyncTest('catch捕获', function () {
+            //asyncTest顶层默认有个stop()，所以这里再调用一次stop(),相当于stop()了两次
+            stop();
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    resolve('linkFly');
+                });
+            }).then(function (data) {
+                start();
+                ok(true, '进入了done分支，开始抛出异常');
+                throw new Error('then Error');
+            })
+            .catch(function (e) {
+                start();
+                ok(true, '捕获异常' + e);
+            });
+        });
+
+        QUnit.asyncTest('catch冒泡异常', function () {
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    resolve('linkFly');
+                });
+            }).then(function (data) {
+                start();
+                ok(true, '进入了done分支，开始抛出异常，这里测试不通过表示正确');
+                throw new Error('then Error');
+            });
+        });
+
+
+        //测试不通过
+        QUnit.asyncTest('catch冒泡捕获', function () {
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    throw new Error('123');
+                }, 1000);
+            })
+                .then(function () { })
+                .then(function () { })
+                .then(function () { })
+                .catch(function (e) {
+                    start();
+                    ok(true, '成功捕获异常：' + e);
+                });
+        });
+
+
+        //测试不通过
+        QUnit.asyncTest('测试Promise结果重写', function () {
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    resolve('linkFly');
+                }, 1000);
+            }).then(function (data) {
+                return new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        resolve([data, 'OK']);
+                    }, 1000);
+                });
+            }).then(function (datas) {
+                alert('木有走？');
+                start();
+                deepEqual(datas, ['linkFly', 'OK'], '成功接收结果');
+            });
+        });
+
+
+
+    </script>
+
+
+
+    <script>
+        //QUnit.module('异步加载模块');
+        //asyncTest('service.fetch( qo,seccess,error,time )', function () {
+        //    stop();
+        //    ////测试fetch
+        //    service.fetch(getQo({
+        //        start: 0
+        //    }), function () {
+        //        ok(true, '第一次请求通过：参数：' + arguments.length);//为什么是3??
+        //        start();
+        //    }, function (isTimeout) {
+        //        ok(false, '第一次请求失败，是否是超时结果？' + isTimeout);
+        //        start();
+        //    });
+
+        //    service.fetch(getQo({
+        //        //第二次
+        //        start: 11
+        //    }))
+        //        .fetch(getQo({
+        //            //第三次
+        //            start: 21
+        //        }), function () {
+        //            start();
+        //            ok(true, '第三次请求成功，参数长度' + arguments.length)
+        //        }, function (isTimeout) {
+        //            ok(false, '第三次请求失败，是否是超时结果？' + isTimeout);
+        //            start();
+        //        })
+        //});
+
+
+
+    </script>
+
 </body>
 </html>

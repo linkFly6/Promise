@@ -201,7 +201,7 @@ Promise实现
 
     The MIT License (MIT)
 
-    Copyright (c) 2004 Kohsuke Kawaguchi, Sun Microsystems Inc., and a number of other contributors. 
+    Copyright (c) 2015 linkFly, and a number of other contributors. 
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
