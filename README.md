@@ -166,8 +166,9 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
 
 ## API
 ### Promise(callback) 
-> 构造函数（constructor）
+> 构造函数（constructor）  
 文档：[Promise Object](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+
 ```javascript
     var promise = new Promise(function (resolve, reject) {//resolve表示成功，reject表示失败
         //异步操作
@@ -176,8 +177,11 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
         }, 1000);
     });
 ```
+
+&nbsp;&nbsp;
+
 ### Promise.prototype.then(onFulfilled[, onRejected])
-> Promise.prototype.then()方法返回一个新的Promise。它有两个参数，分别为Promise在 success（成功） 和 failure（失败） 情况下的回调函数  
+> Promise.prototype.then()方法返回一个新的Promise。它有两个参数，分别为Promise在 success（成功） 和 failure（失败） 情况下的回调函数    
 文档：[Promise.prototype.then](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then)
 
 ```javascript
@@ -236,9 +240,12 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
     })
 ```
 
+&nbsp;&nbsp;
+
 ### Promise.prototype.catch(onRejected)
-> Promise.prototype.catch() 方法只处理Promise被拒绝的情况，并返回一个Promise。该方法的行为和调用Promise.prototype.then(undefined, onRejected)相同。  
+> Promise.prototype.catch() 方法只处理Promise被拒绝的情况，并返回一个Promise。该方法的行为和调用Promise.prototype.then(undefined, onRejected)相同。    
 文档：[Promise.prototype.catch](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch)
+
 ```javascript
     new Promise(function (resolve, reject) {
         //异步操作
@@ -257,7 +264,8 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
     });
 ```
 
-`catch`具有冒泡性质，它的Error可以冒泡。
+`catch`具有冒泡性质，它的Error可以冒泡:
+
 ```javascript
     var noop = function () { };
     new Promise(function (resolve, reject) {
@@ -281,6 +289,7 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
 ```
 
 当Promise中的回调函数抛出异常之后（`then/constructor`），需要使用`catch`进行捕获，否则catch会冒泡到全局环境下：
+
 ```javascript
     new Promise(function () {
         //window Error => Uncaught (in promise) Error: ex => 触发未捕获异常
@@ -289,6 +298,7 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
 ```
 
 上面的代码会抛出全局异常，而需要使用`catch`进行捕获，`catch`的行为和`then(null, onRejected)`一致，所以也可以使用`then(null, onRejected)`进行捕获，下面两段代码是相同的的意义（捕获异常）：
+
 ```javascript
     new Promise(function () {
         throw new Error('ex');
@@ -312,10 +322,13 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
 
     });
 ```
+
+&nbsp;&nbsp;
  
 ### Promise.all(promises)
 > Promise.all(promises) 方法返回一个promise，该promise会在iterable参数内的所有promise都被解决后被解决。  
 文档：[Promise.all](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/all)
+
 ```javascript
     var promise1 = new Promise(function (resolve) {
         //异步任务
@@ -341,8 +354,9 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
 
 
 ### Promise.race(promises)
-> Promise.race(promises)方法返回一个promise，这个promise在iterable中的任意一个promise被解决或拒绝后，立刻以相同的解决值被解决或以相同的拒绝原因被拒绝。  
+> Promise.race(promises)方法返回一个promise，这个promise在iterable中的任意一个promise被解决或拒绝后，立刻以相同的解决值被解决或以相同的拒绝原因被拒绝。    
 文档：[Promise.race](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/race)
+
 ```javascript
     var promise1 = new Promise(function (resolve) {
         //异步任务
@@ -366,10 +380,13 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
     });
 ```
 
+&nbsp;&nbsp;
+
 ### Promise.resolve(value)
 > Promise.resolve(value)方法返回一个以给定值resolve掉的Promise对象。但如果这个值是thenable的（就是说带有then方法）  
-返回的promise会“追随”这个thenable的对象，接收它的最终状态（指resolved/rejected/pendding/settled）；否则这个被返回的promise对象会以这个值被fulfilled  
+返回的promise会“追随”这个thenable的对象，接收它的最终状态（指resolved/rejected/pendding/settled）；否则这个被返回的promise对象会以这个值被fulfilled    
 文档：[Promise.resolve](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve)
+
 ```javascript
     //demo1
     var promise1 = new Promise(function (resolve) {
@@ -397,9 +414,12 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
     });
 ```
 
+&nbsp;&nbsp;
+
 ### Promise.reject(value)
-> Promise.reject(reason)方法返回一个用reason拒绝的Promise。  
-文档：[Promise.reject](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject) 
+> Promise.reject(reason)方法返回一个用reason拒绝的Promise。    
+文档：[Promise.reject](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject)
+ 
 ```javascript
     Promise.reject(false).then(function (data) {
         //Resolve => 不会执行
