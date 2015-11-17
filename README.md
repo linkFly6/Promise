@@ -125,6 +125,10 @@ Promise实现
 
 &nbsp;&nbsp;
 
+传统的异步代码和`Promise`代码对比：
+![promise](http://images.cnblogs.com/cnblogs_com/silin6/596820/o_PromiseAndCallback.png)
+
+&nbsp;&nbsp;
 
 `Promise`的流程，异步的代码扁平化编写：
 ```
