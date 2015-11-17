@@ -5,21 +5,21 @@ Promise-polyfill兼容库[**Promise.js**](https://github.com/linkFly6/Promise/bl
 
 
 ##什么是Promise？
-Promise 对象用于延迟(deferred) 计算和异步(asynchronous ) 计算.。一个Promise对象代表着一个还未完成，但预期将来会完成的操作。Promise用来传递异步操作的消息。它代表了某个未来才会知道结果的事件（通常是一个异步操作），并且这个事件提供统一的API，可供进一步处理。
+`Promise`对象用于延迟(deferred) 计算和异步(asynchronous ) 计算。一个`Promise`对象代表着一个还未完成，但预期将来会完成的操作。`Promise`用来传递异步操作的消息。它代表了某个未来才会知道结果的事件（通常是一个异步操作），并且这个事件提供统一的API，可供进一步处理。
 
-Promise 对象是一个返回值的代理，这个返回值在Promise对象创建时未必已知。它允许你为异步操作的成功或失败指定处理方法。 这使得异步方法可以像同步方法那样返回值：异步方法会返回一个包含了原返回值的 Promise 对象来替代原返回值。
+`Promise`对象是一个返回值的代理，这个返回值在`Promise`对象创建时未必已知。它允许你为异步操作的成功（fulfilled）或失败（rejected）指定处理方法。 这使得异步方法可以像同步方法那样返回值：异步方法会返回一个包含了原返回值的`Promise`对象来替代原返回值。
 
 Promise对象有以下几种状态:
 - pending: 初始状态, 非 fulfilled 或 rejected.
 - fulfilled: 成功的操作.
 - rejected: 失败的操作.
 
-Promise在JavaScript语言早有实现，饱受三年的争议，最终纳入[ECMAScript 2015（ECMAScript 6）规范](http://www.ecma-international.org/ecma-262/6.0/#sec-promise-objects)，Promise遵循Promise/A+规范。统一了用法，原生提供了Promise对象。
-当前或古老的浏览器环境并不支持Promise，于是我编写了这个polyfill的库，用于兼容当前的浏览器环境。
+`Promise`在JavaScript语言早有实现，饱受三年的争议，最终纳入[ECMAScript 2015（ECMAScript 6）规范](http://www.ecma-international.org/ecma-262/6.0/#sec-promise-objects)，`Promise`遵循Promise/A+规范。统一了用法，原生提供了`Promise`对象。
+当前或古老的浏览器环境并不完全支持`Promise`，于是我编写了这个polyfill的库，用于兼容当前的浏览器环境。
 
-Promise的经典在于将JavaScript异步编程抹平为同步编程。
+`Promise的`经典在于将JavaScript异步编程抹平为同步编程。
 
-更多的Promise API细节请参阅我的文章《[JavaScript异步编程（1）- ECMAScript 6的Promise对象](http://www.cnblogs.com/silin6/p/4288967.html)》（我肯定要把我的文章单独放啦~~）.
+更多的`Promise` API细节请参阅我的文章《[JavaScript异步编程（1）- ECMAScript 6的Promise对象](http://www.cnblogs.com/silin6/p/4288967.html)》（我肯定要把我的文章单独放啦~~）.
 
 更多相关文章：
 - [《ECMAScript 6入门 - Promise对象》](http://es6.ruanyifeng.com/#docs/promise)
@@ -156,7 +156,7 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
 
 &nbsp;&nbsp;
 
-特性
+##特性
  - 优雅精湛的实现Promise
  - 覆盖原生Promise 95% 以上的API特性和细节
   
