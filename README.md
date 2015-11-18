@@ -326,7 +326,7 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
 &nbsp;&nbsp;
  
 ### Promise.all(promises)
-> Promise.all(promises) 方法返回一个promise，该promise会在iterable参数内的所有promise都被解决后被解决。  
+> Promise.all(promises) 方法返回一个promise，该promise会在promises参数内的所有promise都被解决后被解决。  
 文档：[Promise.all](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/all)
 
 ```javascript
@@ -354,7 +354,7 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
 
 
 ### Promise.race(promises)
-> Promise.race(promises)方法返回一个promise，这个promise在iterable中的任意一个promise被解决或拒绝后，立刻以相同的解决值被解决或以相同的拒绝原因被拒绝。    
+> Promise.race(promises)方法返回一个promise，这个promise在promises中的任意一个promise被解决或拒绝后，立刻以相同的解决值被解决或以相同的拒绝原因被拒绝。    
 文档：[Promise.race](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/race)
 
 ```javascript
@@ -384,7 +384,7 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
 
 ### Promise.resolve(value)
 > Promise.resolve(value)方法返回一个以给定值resolve掉的Promise对象。但如果这个值是thenable的（就是说带有then方法）  
-返回的promise会“追随”这个thenable的对象，接收它的最终状态（指resolved/rejected/pendding/settled）；否则这个被返回的promise对象会以这个值被fulfilled    
+返回的promise会“追随”这个thenable的对象，接收它的最终状态（指resolved/rejected/pendding）；否则这个被返回的promise对象会以这个值被fulfilled    
 文档：[Promise.resolve](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve)
 
 ```javascript
@@ -417,7 +417,7 @@ promise(ok).then(ok_1).then(ok_2).then(ok_3).reslove(value)------+
 &nbsp;&nbsp;
 
 ### Promise.reject(value)
-> Promise.reject(reason)方法返回一个用reason拒绝的Promise。    
+> Promise.reject(reason)方法返回一个用value拒绝的Promise。    
 文档：[Promise.reject](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject)
  
 ```javascript
