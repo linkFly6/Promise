@@ -12,19 +12,12 @@
     <script src="http://cdn.bootcss.com/qunit/1.18.0/qunit.min.js"></script>
     <script src="../src/util.js"></script>
     <script src="../src/promise.js"></script>
-    <style>
-        .animate-elem { background: yellow; height: 100px; width: 100px; }
-    </style>
 </head>
 <body>
     <div id="qunit"></div>
-    <!--<h1 id="qunit-header">测试结果</h1>-->
     <div id="qunit-testrunner-toolbar"></div>
     <h2 id="qunit-banner"></h2>
-    <!--<h2 id="qunit-userAgent">动画模块</h2>-->
-    <!--<div id="qunit-testrunner-toolbar">动画模块参见<a href="animate.html">这里</a>的测试</div>-->
     <ol id="qunit-tests"></ol>
-    <!--对qunit-fixture的一切修改都会自动还原-->
     <div id="qunit-fixture">
     </div>
     <!--基础配置-->
@@ -38,8 +31,8 @@
     </script>
 
     <script>
-        QUnit.module('构造函数');
-        QUnit.asyncTest('Promise.constructor(executor)', function () {
+        QUnit.module('Promise.constructor');
+        QUnit.asyncTest('new Promise(executor)', function () {
             new Promise(function (resolve, reject) {
                 resolve('test');
             }).then(function (data) {
@@ -58,10 +51,10 @@
             new Promise(function (resolve, reject) {
                 setTimeout(function () {
                     resolve('test');
-                }, 200);
+                }, 100);
             }).then(function (data) {
                 start();
-                equal('test', data, '标准测试Promise.prototype.then');
+                equal('test', data, '标准测试Promise.prototype.then，约1s执行完成');
             }, function () {
                 start();
                 ok(false, '进入了fail分支');
@@ -72,7 +65,7 @@
             new Promise(function (resolve, reject) {
                 setTimeout(function () {
                     resolve('test');
-                }, 1000);
+                }, 100);
             })
             .then(function (data) {
                 start();
@@ -147,6 +140,20 @@
         });
 
 
+        QUnit.asyncTest('catch抛出异常', function () {
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    resolve('linkFly');
+                });
+            }).then(function (data) {
+                start();
+                ok(true, '进入了done分支，开始抛出异常，这里测试不通过表示正确，因为是异步抛的异常，无法通过正常的try catch捕获。异常信息：done Error 7');
+                throw new Error('done Error 7');
+            });
+        });
+
+
+
         QUnit.asyncTest('catch冒泡异常', function () {
             new Promise(function (resolve, reject) {
                 setTimeout(function () {
@@ -154,8 +161,10 @@
                 });
             }).then(function (data) {
                 start();
-                ok(true, '进入了done分支，开始抛出异常，这里测试不通过表示正确，因为是异步抛的异常，无法通过正常的try catch捕获。异常信息：catch Error 7');
+                ok(true, '进入了done分支，开始抛出异常');
                 throw new Error('catch Error 7');
+            }).catch(function () {
+                ok(true, '捕获异常');
             });
         });
 
@@ -297,24 +306,22 @@
 
     <script>
         QUnit.module('Promise.all(promises)');
-        QUnit.asyncTest('Promise.all(true) - 参数容错测试', function () {
-            Promise.all(true).then(function (data) {
+        QUnit.asyncTest('Promise.all(true) - 参数错误测试', function () {
+            QUnit.raises(function () {
+                Promise.all(true).then(function (data) {
+                    start();
+                    equal(false, data, '不应该进入done分支');
+                }, function (data) {
+                    start();
+                    equal(true, data, '不应该进入fail分支');
+                });
+            }, function (error) {
                 start();
-                equal(true, data, '不应该进入done分支');
-            }, function (data) {
-                start();
-                equal(true, data, '进入fail分支，Promise.all(true)测试，Promise.all要求参数是ArrayLike');
-            });
+                return error.message === "Argument 1 of Promise.all can't be converted to a sequence";
+            }, '抛出被正确捕获的catch')
+
         });
-        QUnit.asyncTest('Promise.all([true]) - 简单数据测试', function () {
-            Promise.all([true]).then(function (data) {
-                start();
-                deepEqual([true], data, '进入done分支，Promise.all([true])测试，不具有Promise的行为默认为done，回调函数接收的参数是：[true]');
-            }, function (data) {
-                start();
-                equal(true, data, '不应该进入fail分支');
-            });
-        });
+
 
         QUnit.asyncTest('Promise.all([new Promise]) - 具有Promise行为的参数（包含fail状态的Promise）测试', function () {
             Promise.all([
@@ -411,16 +418,25 @@
         });
     </script>
 
+
     <script>
+
+
         QUnit.module('Promise.race(promises)');
-        QUnit.asyncTest('Promise.race(true) - 非Promise行为非ArrayLike参数测试', function () {
-            Promise.race(true).then(function (data) {
+        QUnit.asyncTest('Promise.race(true) - 非Promise行为非ArrayLike参数测试（参数错误测试）', function () {
+            QUnit.raises(function () {
+                Promise.race(true).then(function (data) {
+                    start();
+                    ok(false, '不应该进入done分支');
+                }, function (data) {
+                    start();
+                    equal(true, data, '进入fail分支，Promise.race(true)测试，Promise.race要求参数是ArrayLike');
+                });
+            }, function (error) {
                 start();
-                ok(false, '不应该进入done分支');
-            }, function (data) {
-                start();
-                equal(true, data, '进入fail分支，Promise.race(true)测试，Promise.race要求参数是ArrayLike');
-            });
+                return error.message === "Argument 1 of Promise.race can't be converted to a sequence";
+            }, '抛出被正确捕获的catch')
+
         });
         QUnit.asyncTest('Promise.race([true]) - 非Promise行为参数ArrayLike测试', function () {
             Promise.race([true]).then(function (data) {

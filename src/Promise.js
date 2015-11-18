@@ -2,7 +2,7 @@
  * Copyright 2015 linkFLy - http://www.cnblogs.com/silin6/
  * Released under the MIT license
  * http://opensource.org/licenses/mit-license.php
- * Help document：https://github.com/linkFly6/so/blob/master/So/Other/Sogou/Promise.md
+ * Help document：https://github.com/linkFly6/Promise
  * Date: 2015-11-13 16:11:13
  * ECMAScript 5(2015)规范Promise对象 - polyfill Promise
  * 规范：https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise
@@ -128,27 +128,33 @@
      * @returns {Promise}
      */
     Promise.all = function (promises) {
-        if (!_.isArrayLike(promises)) {//不是arrayLike则无法循环，直接进入fail
-            return Promise.reject(promises);
+        if (!_.isArrayLike(promises)) {//不是arrayLike则无法循环
+            throw new TypeError("Argument 1 of Promise.all can\'t be converted to a sequence");
         }
         //TODO这个方法测试不通过
         return new Promise(function (resolve, reject) {
-            var res = [];
+            var res = [],
+                //剩余完成的
+                thenableCount = 0;
             each.call(promises, function (item, i) {
-                var itemType = typeof item;
                 //具有promise行为
-                if (itemType === 'object' && _.isFunction(item.then)) {
+                if (likePromise(item)) {
+                    thenableCount++;
+                    res.push(0);
                     item.then(function (data) {
-                        //不能使用push啊！！！
-                        res.push(data);
+                        //当thenableCount为0表示所有的Promise行为都已完成
+                        thenableCount--;
+                        res[i] = data;
                         //防止这个promise的长度在循环中产生变动
-                        promises.length === res.length && resolve(res);
+                        promises.length === res.length && !thenableCount && resolve(res);
                     }, function (data) {
                         reject(data);
                     });
-                } else
+                } else {
                     res.push(item);
-                promises.length === res.length && resolve(res);
+                    promises.length === res.length && !thenableCount && resolve(res);
+                }
+
             })
         })
 
@@ -161,8 +167,9 @@
      * @returns {Promise}
      */
     Promise.race = function (promises) {
-        if (!_.isArrayLike(promises))
-            return Promise.reject(promises);
+        if (!_.isArrayLike(promises)) {//不是arrayLike则无法循环
+            throw new TypeError("Argument 1 of Promise.race can\'t be converted to a sequence");
+        }
         return new Promise(function (resolve, reject) {
             var i = 0,
                 item;
@@ -214,9 +221,8 @@
 
     //回调中心处理
     function doCallback(promise, status, data, callback) {
-        //挂起异步，让promise其他的代码先执行
-        //_.nextTick();
-        setTimeout(function () {
+        //setTimeout();
+        _.nextTick(function () { //挂起异步，让promise其他的代码先执行
             //doCallback有多个入口，当一个任务完成后阻塞住其他任务
             if (promise._isover) {
                 if (_.isFunction(callback)) //已完成，有回调函数，直接调用
@@ -248,7 +254,7 @@
                 if (_.isFunction(callback))
                     callback.call(promise, e);
             }
-        }, 0);
+        });
     }
 
     function nextTickCallback(promise, func, data, status, callback) {
