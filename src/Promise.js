@@ -29,8 +29,7 @@
     }
     //TODO 
     //if (_.isFunction(window.Promise)) return window.Promise;
-    var bind = Function.prototype.bind,
-        ON_FUlFILLED = '[[OnFulfilled]]',
+    var ON_FUlFILLED = '[[OnFulfilled]]',
         ON_REJECTED = '[[OnRejected]]',
         CHAIN = '[[Chain]]',
         STATUS = {
@@ -49,7 +48,7 @@
         },
         each = Array.prototype.forEach;
     //DEBUG
-    var GUID = 0;
+    //var GUID = 0;
 
     /*
      * 通过构造函数创建一个Promise对象
@@ -61,7 +60,7 @@
         if (!(this instanceof Promise)) throw new TypeError("Constructor Promise requires 'new'");
         if (!_.isFunction(executor)) throw new TypeError('Not enough arguments to Promise.');
         this._status = STATUS.PENDING;
-        this._id = GUID++;//DEBUG
+        //this._id = GUID++;//DEBUG
         this._isover = false;
         var $this = this;
 
@@ -83,7 +82,6 @@
 
             });
         } catch (e) {
-            //$this._isover = true;
             $this._data = e;
             doCallback($this, $this._status = STATUS.ERROR, e);
         }
@@ -103,7 +101,6 @@
         $this[ON_REJECTED] = onRejected;
         return newPromise = new Promise(function (resolve, reject) {
             doCallback($this, $this._status, $this._data, function (data) {
-                //这里的error状态传递处理方式
                 if (this._status === STATUS.ERROR)
                     newPromise._status = this._status; //=> 传递error
                 this._status === STATUS.DONE ? resolve(data) : reject(data);
@@ -131,7 +128,6 @@
         if (!_.isArrayLike(promises)) {//不是arrayLike则无法循环
             throw new TypeError("Argument 1 of Promise.all can\'t be converted to a sequence");
         }
-        //TODO这个方法测试不通过
         return new Promise(function (resolve, reject) {
             var res = [],
                 //剩余完成的
